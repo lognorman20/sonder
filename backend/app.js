@@ -4,6 +4,7 @@ const User = require('./User')
 const Agent = require('./Agent')
 const axios = require('axios');
 const bodyParser = require('body-parser');
+const cron = require('node-cron');
 
 const app = express()
 const port = 3000
@@ -15,6 +16,7 @@ const port = 3000
 
 //user: wallet address 
 
+const bearerToken = 'AAAAAAAAAAAAAAAAAAAAAFf5ygEAAAAA9zxHDfY%2Fliw4HZxXjwg8fMfyHr4%3D2yoU3Y0S9DjQwK8TpBQb3rOSL3l7fH46rDPHJwY0G5M71XKGt1'; 
 
 
 
@@ -82,6 +84,30 @@ app.post('/stake_agent', (req, res) => {
     });
 })
 
+
+async function fetchTweets() {
+    try {
+        const response = await axios.get(
+          `https://api.twitter.com/2/users/44196397/tweets`, {
+            params: {
+              'max_results': 5,
+              'tweet.fields': 'text',
+              'expansions': 'author_id'
+            },
+            headers: {
+              'Authorization': `Bearer ${bearerToken}`
+            }
+          }
+        );
+        
+        tweets = (response.data.data.map(tweet => tweet.text));
+}
+catch(error) {
+    console.log(error.message);
+}
+};
+
+
 app.post('/send-data', async (req, res) => {
     try {
         const responses = await Promise.all(
@@ -104,6 +130,7 @@ app.post('/send-data', async (req, res) => {
                     return { 
                         agent: agent.api, 
                         error: error.response ? error.response.data : error.message 
+
                     };
                 }
             })
@@ -116,6 +143,17 @@ app.post('/send-data', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+
+cron.schedule('0 */2 * * *', async () => {
+    console.log('Running scheduled data refresh');
+    await fetchTweets();
+  });
+  
+  fetchTweets().then(() => {
+    console.log('Initial tweets fetched');
+});
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
