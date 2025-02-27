@@ -5,9 +5,31 @@ const CustomResponse = require("./utils/validateResponse");
 const oracleService = require("./oracle.service");
 const dalService = require("./dal.service");
 
+/// Type definitions
+/**
+ * @typedef {Object} Scores
+ * @property {string} creator - The agent creator's address or ID
+ * @property {number} score - The score of the prediction
+ */
+
+/**
+ * @typedef {Object} Prediction
+ * @property {string} creator - The agent creator's address or ID
+ * @property {number} score - The score of the prediction
+ */
+
+/**
+ * @typedef {Object} Predictions
+ * @property {Prediction[]} predictions - An array of Prediction objects
+ * @property {string} actual - The actual value to compare against
+ */
+
+///
+
 const router = Router()
 
-router.post("/execute", async (req, res) => {
+
+router.post("/execute", async (req /** @type {Predictions} */, res) => {
     console.log("Executing task");
 
     try {
@@ -15,19 +37,21 @@ router.post("/execute", async (req, res) => {
         console.log(`taskDefinitionId: ${taskDefinitionId}`);
 
         // parse out the predictions
+        /** @type {Prediction[]} */
         const predictions = req.body.predictions;
         const actual = req.body.actual;
 
         // score predictions
+        /** @type {Scores[]} */
         const scores = [];
         for (const pred of predictions) {
-            console.log("pred:\n" + pred);
             const text = pred.text;
             const score = await oracleService.score(text, actual);
             scores.push({ score: score, creator: pred.agent_creator });
         }
 
         // rank agents
+        scores.sort((a, b) => b.score - a.score);
 
         // send rankings to smart contract
 
