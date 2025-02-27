@@ -9,7 +9,7 @@ export default function LandingPage() {
     useEffect(() => {
         const fetchAgents = async () => {
             try {
-                const response = await fetch("http://localhost:3000/agents"); // Replace with your backend URL
+                const response = await fetch("http://localhost:3000/agents"); 
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
@@ -53,7 +53,7 @@ export default function LandingPage() {
 
         <h1 className="text-5xl font-black text-center"> Welcome to Sonder! </h1>
 
-        <h2 className="text-center text-2xl font-semibold"> Currently trending agents </h2>
+        <h2 className="text-center text-2xl font-semibold"> Current agents </h2>
 
         {/* ✅ Show loading state */}
         {loading && <p className="text-center">Loading AI Agents...</p>}
