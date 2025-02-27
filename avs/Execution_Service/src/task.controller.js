@@ -9,6 +9,7 @@ const dalService = require("./dal.service");
 /**
  * @typedef {Object} Scores
  * @property {string} creator - The agent creator's address or ID
+ * @property {string} prediction - The prediction the agent generated
  * @property {number} score - The score of the prediction
  */
 
@@ -37,17 +38,19 @@ router.post("/execute", async (req /** @type {Predictions} */, res) => {
         console.log(`taskDefinitionId: ${taskDefinitionId}`);
 
         // parse out the predictions
-        /** @type {Prediction[]} */
-        const predictions = req.body.predictions;
+        const predictions = req.body.predictions; /** @type {Prediction[]} */
         const actual = req.body.actual;
 
         // score predictions
-        /** @type {Scores[]} */
-        const scores = [];
+        const scores = []; /** @type {Scores[]} */
         for (const pred of predictions) {
             const text = pred.text;
             const score = await oracleService.score(text, actual);
-            scores.push({ score: score, creator: pred.agent_creator });
+            scores.push({ 
+                score: score,
+                creator: pred.agent_creator,
+                prediction: text
+            });
         }
 
         // rank agents
@@ -58,15 +61,15 @@ router.post("/execute", async (req /** @type {Predictions} */, res) => {
         // send rankings to api
 
         // post predictions to eigenda
-        // const [cid, poll] = await dalService.publishToEigenDA(result);
+        // const [cid, poll] = await dalService.publishToEigenDA(scores);
         // const blob = await poll;
         // console.log(`blob data: ${blob}`);
-        // await dalService.sendTask(cid, data, taskDefinitionId);
+        // await dalService.sendTask(cid, scores.join(" "), taskDefinitionId);
 
         // normal flow (remove iff eigenda being used)
         const cid = await dalService.publishJSONToIpfs(scores);
-        // const data = "hello";
         await dalService.sendTask(cid, scores.join(" "), taskDefinitionId);
+
         return res.status(200).send(new CustomResponse({proofOfTask: cid, data: scores, taskDefinitionId: taskDefinitionId}, "Task executed successfully"));
     } catch (error) {
         console.log(error)
