@@ -1,7 +1,7 @@
 const User = require('./User')
 
 class Agent {
-    constructor(api, creator, stakers) {
+    constructor(name, api, key, creator, stakers) {
 
         if (typeof api !== "string") {
             throw new Error ("api must be of type string")
@@ -15,7 +15,9 @@ class Agent {
             throw new Error("Invalid type: stakers must be an array of User instances");
         }
 
+        this.name = name
         this.api = api
+        this.key = key
         this.creator = creator
         this.stakers = stakers
     }

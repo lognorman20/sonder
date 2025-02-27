@@ -67,14 +67,13 @@ export default function LandingPage() {
           <div key={index} className="bg-gray-800 rounded-lg border border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow">
             {/* <h3 className="text-xl font-semibold text-white mb-2">{card.title}</h3> */}
             {/* <p className="text-gray-400 mb-4">{card.description}</p> */}
-            {agent.api && (
               <a 
-                // href={image.api} 
+                href={agent.api} 
                 className="text-4xl text-blue-400 hover:text-blue-300 transition-colors mb-5"
               >
-                {agent.api} 
+                {agent.name} 
               </a>
-            )}
+            
             <h3  className="text-xl font-semibold text-white truncate w-full mt-2"> Creator: </h3>
             <p className="text-m text-white mb-2 truncate w-full"> {agent.creator} </p>
             <h3  className="text-xl font-semibold text-white"> Stakers: </h3>
