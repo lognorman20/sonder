@@ -183,4 +183,78 @@ contract SonderTest is Test {
             "addr2 deposit should be recorded"
         );
     }
+
+    function testRewardWithCreator() public {
+        // Setup deposits and staking
+        uint256 depositAmount = 0.001 ether;
+        vm.deal(addr1, depositAmount);
+        vm.prank(addr1);
+        sonder.depositFee{value: depositAmount}("agent1");
+
+        vm.deal(addr2, depositAmount);
+        vm.prank(addr2);
+        sonder.depositFee{value: depositAmount}("agent1");
+
+        // Add extra funds to the contract to ensure rewards can be distributed
+        vm.deal(owner, 0.01 ether);
+        vm.prank(owner);
+        (bool success, ) = address(sonder).call{value: 0.01 ether}("");
+        require(success, "Adding funds failed");
+
+        // Record balances before reward
+        uint256 creatorBalanceBefore = sonder.getUserDeposit(addr1);
+
+        // Set score and creator address
+        int256 score = 1; // High score (best performance)
+        address creator = addr1; // addr1 is the creator
+
+        // Call reward function
+        vm.prank(owner); // Only owner can call reward
+        sonder.reward("agent1", score, creator);
+
+        // Check balances to confirm rewards distribution
+        uint256 creatorBalanceAfter = addr1.balance;
+
+        // Ensure creator gets rewards
+        assertGt(creatorBalanceAfter, 0, "Creator should receive more rewards");
+    }
+
+    function testRewardWithLowScore() public {
+        // Setup deposits and staking
+        uint256 depositAmount = 0.001 ether;
+        vm.deal(addr1, depositAmount);
+        vm.prank(addr1);
+        sonder.depositFee{value: depositAmount}("agent1");
+
+        vm.deal(addr2, depositAmount);
+        vm.prank(addr2);
+        sonder.depositFee{value: depositAmount}("agent1");
+
+        // Add extra funds to the contract to ensure rewards can be distributed
+        vm.deal(owner, 0.01 ether);
+        vm.prank(owner);
+        (bool success, ) = address(sonder).call{value: 0.01 ether}("");
+        require(success, "Adding funds failed");
+
+        // Record balances before reward
+        uint256 creatorBalanceBefore = addr1.balance;
+
+        // Set a low score (-1) and creator address
+        int256 score = -1; // Low score
+        address creator = addr1; // addr1 is the creator
+
+        // Call reward function
+        vm.prank(owner); // Only owner can call reward
+        sonder.reward("agent1", score, creator);
+
+        // Check balances to confirm rewards distribution
+        uint256 creatorBalanceAfter = addr1.balance;
+
+        // Ensure creator gets rewards
+        assertGt(
+            creatorBalanceAfter,
+            creatorBalanceBefore,
+            "Creator should receive more rewards"
+        );
+    }
 }
