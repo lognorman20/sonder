@@ -45,7 +45,7 @@ contract Sonder {
         require(success, "Owner withdraw failed");
     }
 
-    function contractBalance() public view returns (uint256) {
+    function getContractBalance() public view returns (uint256) {
         return address(this).balance;
     }
 
