@@ -1,3 +1,6 @@
+require('dotenv').config();
+const { ethers } = require('ethers');
+
 const express = require('express')
 const cors = require('cors')
 const User = require('./User')
@@ -19,6 +22,25 @@ const port = 3000
 const bearerToken = 'AAAAAAAAAAAAAAAAAAAAAFf5ygEAAAAA9zxHDfY%2Fliw4HZxXjwg8fMfyHr4%3D2yoU3Y0S9DjQwK8TpBQb3rOSL3l7fH46rDPHJwY0G5M71XKGt1'; 
 
 
+// Load Ethereum Provider (Alchemy, Infura, or Local Node)
+const provider = new ethers.JsonRpcProvider(process.env.RPC_URL); // Update with your provider URL
+
+// Load Wallet (Use Private Key - Ensure .env is used for security)
+const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+
+// Contract Details
+const contractAddress = "0xca2B956b96968F749d21D59cB60288d5C49fA6E0";  // Replace with your deployed contract address
+const contractABI = [
+    "function depositFee(string memory agentId) public payable",
+    "function stakeInAgent(string memory agentId) public payable",
+    "function getUserDeposit(address user) public view returns (uint256)",
+    "function reward(string memory agentId, int256 score, address creator) public"
+];
+
+// Create Contract Instance
+const contract = new ethers.Contract(contractAddress, contractABI, wallet);
+
+
 
 const users = [];
 
@@ -34,17 +56,33 @@ app.use(cors({
 app.use(express.json());
 app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-});
-
-app.post('/create_agent', (req, res) =>  {
+app.post('/create_agent', async(req, res) =>  {
     const {name, api, key, owner, type} = req.body;
     const user = new User(owner);
     const agent = new Agent(name, api, key, user, [user]);
-    users.push(user);
-    agents.push(agent);
-    res.send({ message: `AI Agent ${api} of type ${type} created!` });
+
+    const depositAmount = ethers.parseEther("0.1"); 
+
+    try {
+        // Send the deposit transaction to the contract
+        const tx = await contract.depositFee(name, { value: depositAmount });
+        await tx.wait(); // Wait for confirmation
+
+        users.push(user);
+        agents.push(agent);
+
+        res.json({
+            success: true,
+            message: `Agent ${name} created successfully with deposit.`,
+            transactionHash: tx.hash
+        });
+
+    }
+
+    catch(error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Agent creation failed!", error: error.message });
+    }
 
 });
 
@@ -59,7 +97,7 @@ app.get('/agents', (req, res) => {
     res.json({ success: true, agents: agentList });
 })
 
-app.post('/stake_agent', (req, res) => {
+app.post('/stake_agent', async(req, res) => {
     const {api, user, amount} = req.body;
 
     const agent = agents.find(agent => agent.api == api);
@@ -74,6 +112,17 @@ app.post('/stake_agent', (req, res) => {
     if (!amount || isNaN(amount) || amount <= 0) {
         return res.status(400).json({ success: false, message: "Invalid staking amount!" });
     }
+
+    // // Convert amount to Wei
+    // const amountInWei = ethers.parseEther(amount.toString());
+
+    // // Send Transaction to Smart Contract
+    // const tx = await contract.stakeInAgent(agent.api, { value: amountInWei });
+
+    // // Wait for transaction confirmation
+    // await tx.wait();
+
+
     const userObj = new User(user);
     agent.addStaker(userObj); 
 
@@ -83,6 +132,39 @@ app.post('/stake_agent', (req, res) => {
         agent,
     });
 })
+
+app.post('/reward_highest_agent', async(req, res) => {
+    const { agentId, score, creatorAddress } = req.body;
+    
+    try {
+        // Convert score to the format expected by the contract
+        // If score is between 0-1, scale it appropriately for your contract
+        const scaledScore = Math.floor(score * 100); // Adjust scaling as needed
+        
+        // Call the reward function
+        const tx = await contract.reward(
+            agentId,
+            scaledScore,
+            creatorAddress,
+            { gasLimit: 3000000 } // Add appropriate gas limit
+        );
+        
+        await tx.wait(); // Wait for confirmation
+        
+        res.json({
+            success: true,
+            message: `Agent ${agentId} rewarded successfully`,
+            transactionHash: tx.hash
+        });
+    } catch(error) {
+        console.error(error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Reward distribution failed!", 
+            error: error.message 
+        });
+    }
+});
 
 
 async function fetchTweets() {
@@ -123,26 +205,54 @@ app.post('/send-data', async (req, res) => {
                             }
                         }
                     );
-                    return { agent: agent.api, status: response.status, data: response.data };
+                    return { agent_name: agent.name, agent_address: agent.creator.address, agent_id: agent.id, status: response.status, data: response.data };
                 }
 
                 catch (error) {
                     return { 
-                        agent: agent.api, 
+                        agent_name: agent.name,
+                        agent_address: agent.creator.address,
+                        agent_id: agent.id, 
                         error: error.response ? error.response.data : error.message 
 
                     };
                 }
             })
         );
-        // console.log(JSON.stringify(responses, null, 2));        
-        res.status(200).json(responses.map(response => response.data?.[0]?.text || "No tweet available"));
+
+        console.log("All responses:", JSON.stringify(responses, null, 2));
+
+        res.status(200).json(responses); // ✅ Send the array directly
+
     }
     catch (error) {
     console.error('Unexpected error:', error.message);
     res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+app.post('/get-name-creator', async (req, res) => {
+    const { uuids } = req.body; // Expecting an array of UUIDs
+
+    if (!Array.isArray(uuids)) {
+        return res.status(400).json({ error: "Invalid request format. Expected an array of UUIDs." });
+    }
+
+    const result = {}; // Store matched agents
+
+    uuids.forEach(uuid => {
+        const agent = agents.find(agent => agent.id === uuid);
+        console.log(`Checking UUID ${uuid}: Found agent?`, !!agent);        
+        result[uuid] = {
+            name: agent.name,
+            creator: agent.creator
+        };
+    
+    });
+
+    res.status(200).json(result); // Return the object mapping UUIDs to names & creators
+});
+
 
 
 cron.schedule('0 */2 * * *', async () => {

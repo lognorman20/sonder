@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require('uuid');
 const User = require('./User')
 
 class Agent {
@@ -15,11 +16,12 @@ class Agent {
             throw new Error("Invalid type: stakers must be an array of User instances");
         }
 
-        this.name = name
-        this.api = api
-        this.key = key
-        this.creator = creator
-        this.stakers = stakers
+        this.name = name;
+        this.id = uuidv4();
+        this.api = api;
+        this.key = key;
+        this.creator = creator;
+        this.stakers = stakers;
     }
 
     addStaker(user) {
@@ -28,6 +30,7 @@ class Agent {
         }
         this.stakers.push(user);
     }
+
 }
 
 module.exports = Agent;
