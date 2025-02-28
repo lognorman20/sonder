@@ -66,14 +66,7 @@ const Navbar = () => {
             >
               Dashboard
             </Link>
-            <Link 
-              to="/rankings" 
-              className={`text-white hover:text-blue-400 transition-colors pb-1 ${
-                isActive('/rankings') ? 'border-b-2 border-blue-500' : ''
-              }`}
-            >
-              Rankings
-            </Link>
+            
             <Link 
               to="/upload" 
               className={`text-white hover:text-blue-400 transition-colors pb-1 ${

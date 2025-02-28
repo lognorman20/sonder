@@ -9,7 +9,6 @@ import Navbar from "./components/Navbar";
 import CreateAIAgent from './CreateAIAgent'
 import LandingPage from './LandingPage'
 import Stake from "./Stake";
-import Rankings from "./Rankings"
 
 
 
@@ -24,7 +23,6 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/upload" element={<CreateAIAgent />} />
         <Route path="/stake" element={<Stake />} />
-        <Route path="/rankings" element={<Rankings />} />
         {/* Add additional routes as needed */}
       </Routes>
     </BrowserRouter>

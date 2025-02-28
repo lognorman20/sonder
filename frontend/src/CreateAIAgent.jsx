@@ -89,15 +89,13 @@ export default function CreateAIAgent() {
         {/* Upload Button */}
         <button
           onClick={handleCreate}
-          className= "w-full mt-6 py-3 px-4 rounded-md font-medium text-gray-700" 
+          className= "w-full mt-6 py-3 px-4 rounded-md text-white font-medium" 
         >
-          Upload & Verify
+          Upload Agent
         </button>
       </div>
 
-      <div className="w-full bg-gray-800 rounded-lg border border-gray-700 mb-6 p-6"> 
-        <h2 className="text-xl font-bold text-white mb-6 mt-6 text-center"> Verification Results </h2>
-      </div>
+      
     </div>
   </div>
   
