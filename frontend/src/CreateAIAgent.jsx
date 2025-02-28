@@ -36,6 +36,11 @@ export default function CreateAIAgent() {
         console.error('Error:', error);
       }
     }
+
+    setName("");
+    setapi("");
+    setapiKey("");
+    
     };
 
   return (
@@ -84,11 +89,7 @@ export default function CreateAIAgent() {
         {/* Upload Button */}
         <button
           onClick={handleCreate}
-          className={`w-full mt-6 py-3 px-4 rounded-md font-medium ${
-            name && api && apiKey
-              ? "bg-blue-600 hover:bg-blue-700 text-white" 
-              : "bg-gray-700 text-gray-500 cursor-not-allowed"
-          } transition-colors`}
+          className= "w-full mt-6 py-3 px-4 rounded-md font-medium text-gray-700" 
         >
           Upload & Verify
         </button>

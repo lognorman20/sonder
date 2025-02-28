@@ -6,10 +6,11 @@ import { Container, Row, Col, Card } from 'react-bootstrap';
 export default function LandingPage() {
     const [agents, setAgents] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [tweets, setTweets] = useState([]);
     useEffect(() => {
         const fetchAgents = async () => {
             try {
-                const response = await fetch("http://localhost:3000/agents"); // Replace with your backend URL
+                const response = await fetch("http://localhost:3000/agents"); 
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
@@ -25,27 +26,33 @@ export default function LandingPage() {
         fetchAgents();
     }, []);
 
-    const items = Array.from({ length: 9 }, (_, i) => `Card ${i + 1}`);
-    const cardsContent = [
-        {
-          title: "Elon Twitter Agent",
-          description: "Predict Elon Musk's Next Tweet",
-          image: "/path/to/image1.jpg",
-          link: "https://autonome.alt.technology/elon-bvjgxq"
-        },
-        {
-          title: "Libra Price Agent",
-          description: "Predict price of Libra Token",
-          image: "/path/to/image2.jpg",
-          link: "https://example.com/2"
-        },
-        {
-          title: "Fashion AI Agent",
-          description: "Predicting celebrity outfits at the Met Gala",
-          image: "/path/to/image3.jpg",
-          link: "https://example.com/3"
-        },
-      ];
+
+    const handleComparison = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/send-data", {
+          method: "POST", // Specify the request method
+          headers: {
+              "Content-Type": "application/json" // Specify the content type
+          },
+          body: JSON.stringify({
+             "text": "tell me about current events in a tweet"
+          }) 
+      });
+    
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+    
+        const data = await response.json(); // ✅ Parse JSON
+        console.log("Fetched Tweets:", data); // Debugging
+        setTweets(data); // ✅ Set state with fetched tweets
+      } catch (error) {
+        console.error("Error fetching tweets:", error);
+      }
+    };
+  
+
+    
 
 
     return (
@@ -53,7 +60,7 @@ export default function LandingPage() {
 
         <h1 className="text-5xl font-black text-center"> Welcome to Sonder! </h1>
 
-        <h2 className="text-center text-2xl font-semibold"> Currently trending agents </h2>
+        <h2 className="text-center text-2xl font-semibold"> Current agents </h2>
 
         {/* ✅ Show loading state */}
         {loading && <p className="text-center">Loading AI Agents...</p>}
@@ -91,6 +98,12 @@ export default function LandingPage() {
       </div>
     </div>
             </div>
+
+            <button onClick={handleComparison} className="block mx-auto text-center bg-blue-500 text-black px-4 py-2 rounded">
+            Run Comparison Now!
+            
+            </button>
+
         </div> 
         
     );

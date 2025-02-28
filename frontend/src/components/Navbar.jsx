@@ -67,12 +67,12 @@ const Navbar = () => {
               Dashboard
             </Link>
             <Link 
-              to="/marketplace" 
+              to="/rankings" 
               className={`text-white hover:text-blue-400 transition-colors pb-1 ${
-                isActive('/marketplace') ? 'border-b-2 border-blue-500' : ''
+                isActive('/rankings') ? 'border-b-2 border-blue-500' : ''
               }`}
             >
-              Marketplace
+              Rankings
             </Link>
             <Link 
               to="/upload" 
@@ -137,12 +137,12 @@ const Navbar = () => {
               Dashboard
             </Link>
             <Link 
-              to="/marketplace" 
+              to="/rankings" 
               className={`text-white hover:text-blue-400 py-2 transition-colors ${
-                isActive('/marketplace') ? 'border-l-4 border-blue-500 pl-2' : 'pl-2'
+                isActive('/rankings') ? 'border-l-4 border-blue-500 pl-2' : 'pl-2'
               }`}
             >
-              Marketplace
+              Rankings
             </Link>
             <Link 
               to="/upload" 
