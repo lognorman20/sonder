@@ -4,32 +4,33 @@ pragma solidity ^0.8.13;
 contract Sonder {
     uint256 public requiredDepositAmount;
     address public owner;
+    mapping(address => uint256) public deposits; // Track deposits per user
 
-    // Constructor to set the required deposit amount and the owner
     constructor(uint256 _requiredDepositAmount) {
         requiredDepositAmount = _requiredDepositAmount;
-        owner = msg.sender;  // Set the owner to be the account deploying the contract
+        owner = msg.sender;
     }
 
-    // Function to receive a deposit fee from anyone with the required amount
     function depositFee() public payable {
         require(msg.value == requiredDepositAmount, "Incorrect deposit amount");
-        // The ether is now held in the contract
+        deposits[msg.sender] += msg.value; // Track user deposit
     }
 
-    // Fallback function to receive ether from users willingly
     receive() external payable {
-        // Funds sent to the contract stay here
+        deposits[msg.sender] += msg.value; // Track ETH received
     }
 
-    // Function to withdraw ether from the contract (only the owner can withdraw)
     function withdraw(uint256 amount) public {
         require(msg.sender == owner, "Only the owner can withdraw");
-        payable(msg.sender).transfer(amount);
+        (bool success, ) = payable(owner).call{value: amount}("");
+        require(success, "Owner withdraw failed");
     }
 
-    // Function to check the contract's balance
     function contractBalance() public view returns (uint256) {
         return address(this).balance;
+    }
+
+    function getUserDeposit(address user) public view returns (uint256) {
+        return deposits[user];
     }
 }

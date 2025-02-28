@@ -140,4 +140,41 @@ contract SonderTest is Test {
             "Contract should initialize with correct deposit amount"
         );
     }
+
+    function testDepositFeeTracksUserDeposits() public {
+        uint256 depositAmount = sonder.requiredDepositAmount(); // Use the contract's required amount
+
+        // addr1 deposits the required amount
+        vm.deal(addr1, depositAmount); // Make sure addr1 has enough ETH
+        vm.prank(addr1);
+        sonder.depositFee{value: depositAmount}();
+
+        // Check addr1's deposit balance
+        uint256 addr1Balance = sonder.getUserDeposit(addr1);
+        assertEq(
+            addr1Balance,
+            depositAmount,
+            "addr1 deposit should be recorded"
+        );
+    }
+
+    function testReceiveEtherTracksUserDeposits() public {
+        uint256 depositAmount = 0.002 ether;
+
+        // Make sure addr2 has enough ETH
+        vm.deal(addr2, depositAmount);
+
+        // addr2 sends ETH directly to the contract
+        vm.prank(addr2);
+        (bool success, ) = address(sonder).call{value: depositAmount}("");
+        require(success, "Ether transfer failed");
+
+        // Check addr2's deposit balance
+        uint256 addr2Balance = sonder.getUserDeposit(addr2);
+        assertEq(
+            addr2Balance,
+            depositAmount,
+            "addr2 deposit should be recorded"
+        );
+    }
 }
