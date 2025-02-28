@@ -222,7 +222,7 @@ app.post('/send-data', async (req, res) => {
 
         console.log("All responses:", JSON.stringify(responses, null, 2));
 
-        res.status(200).json(responses); // ✅ Send the array directly
+        res.status(200).json(responses); 
 
     }
     catch (error) {
@@ -232,7 +232,7 @@ app.post('/send-data', async (req, res) => {
 });
 
 app.post('/get-name-creator', async (req, res) => {
-    const { uuids } = req.body; // Expecting an array of UUIDs
+    const { uuids } = req.body; // an array of UUIDs
 
     if (!Array.isArray(uuids)) {
         return res.status(400).json({ error: "Invalid request format. Expected an array of UUIDs." });
@@ -250,7 +250,7 @@ app.post('/get-name-creator', async (req, res) => {
     
     });
 
-    res.status(200).json(result); // Return the object mapping UUIDs to names & creators
+    res.status(200).json(result); // map of UUIDs to names & creators
 });
 
 
