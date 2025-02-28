@@ -7,25 +7,19 @@ const dalService = require("./dal.service");
 
 /// Type definitions
 /**
- * @typedef {Object} Scores
- * @property {string} creator - The agent creator's address or ID
+ * @typedef {Object} Score
+ * @property {string} creatorAddress - The agent creator's address
+ * @property {string} agentId - The agent's UUID
  * @property {string} prediction - The prediction the agent generated
  * @property {number} score - The score of the prediction
- */
-
-/**
  * @typedef {Object} Prediction
- * @property {string} creator - The agent creator's address or ID
- * @property {number} score - The score of the prediction
- */
-
-/**
- * @typedef {Object} Predictions
- * @property {Prediction[]} predictions - An array of Prediction objects
- * @property {string} actual - The actual value to compare against
- */
-
-///
+ * @property {string} creatorAddress - The agent creator's address
+ * @property {string} agentId - The agent's UUID
+ * @property {string} text - The prediction the agent generated
+* @typedef {Object} Predictions
+* @property {Prediction[]} predictions - An array of Prediction objects
+* @property {string} actual - The actual value to compare against
+*/
 
 const router = Router()
 
@@ -42,14 +36,15 @@ router.post("/execute", async (req /** @type {Predictions} */, res) => {
         const actual = req.body.actual;
 
         // score predictions
-        const scores = []; /** @type {Scores[]} */
+        const scores = []; /** @type {Score[]} */
         for (const pred of predictions) {
             const text = pred.text;
             const score = await oracleService.score(text, actual);
             scores.push({ 
                 score: score,
-                creator: pred.agent_creator,
-                prediction: text
+                agentId: pred.agentId,
+                prediction: text,
+                creatorAddress: pred.creatorAddress
             });
         }
 
