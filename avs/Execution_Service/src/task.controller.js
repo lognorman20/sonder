@@ -10,11 +10,13 @@ const dalService = require("./dal.service");
  * @typedef {Object} Score
  * @property {string} creatorAddress - The agent creator's address
  * @property {string} agentId - The agent's UUID
+ * @property {string} agentName - The agent's name
  * @property {string} prediction - The prediction the agent generated
  * @property {number} score - The score of the prediction
  * @typedef {Object} Prediction
  * @property {string} creatorAddress - The agent creator's address
  * @property {string} agentId - The agent's UUID
+ * @property {string} agentName - The agent's name
  * @property {string} text - The prediction the agent generated
 * @typedef {Object} Predictions
 * @property {Prediction[]} predictions - An array of Prediction objects
@@ -43,6 +45,7 @@ router.post("/execute", async (req /** @type {Predictions} */, res) => {
             scores.push({ 
                 score: score,
                 agentId: pred.agentId,
+                agentName: pred.agentName,
                 prediction: text,
                 creatorAddress: pred.creatorAddress
             });
