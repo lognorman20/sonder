@@ -20,19 +20,21 @@ contract SonderTest is Test {
         // Set additional test accounts
         addr1 = address(0x123);
         addr2 = address(0x456);
+
+        vm.deal(addr1, 0.01 ether);
+        vm.deal(addr2, 0.01 ether);
     }
 
     function testDepositFee() public {
-        // Send 0.001 ETH to the depositFee function
         uint256 depositAmount = 0.001 ether;
 
-        // Ensure the transaction doesn't revert
+        // Ensure the transaction doesn't revert and use the correct function signature
+        vm.prank(addr1); // Set addr1 as the sender
         (bool success, ) = address(sonder).call{value: depositAmount}(
-            abi.encodeWithSignature("depositFee()")
+            abi.encodeWithSignature("depositFee(string)", "agent1")
         );
         require(success, "Deposit failed");
 
-        // Check the contract balance to ensure the deposit went through
         uint256 contractBalance = address(sonder).balance;
         assertEq(
             contractBalance,
@@ -46,8 +48,9 @@ contract SonderTest is Test {
         uint256 depositAmount = 0.002 ether;
 
         (bool success, ) = address(sonder).call{value: depositAmount}(
-            abi.encodeWithSignature("depositFee()")
+            abi.encodeWithSignature("depositFee(string)", "agent1")
         );
+        require(!success, "Deposit failed");
 
         // Ensure the transaction fails
         assertEq(success, false, "Deposit should fail for incorrect amount");
@@ -58,7 +61,7 @@ contract SonderTest is Test {
 
         // Send the deposit to the contract
         (bool success, ) = address(sonder).call{value: depositAmount}(
-            abi.encodeWithSignature("depositFee()")
+            abi.encodeWithSignature("depositFee(string)", "agent1")
         );
         require(success, "Deposit failed");
 
@@ -88,7 +91,7 @@ contract SonderTest is Test {
 
         // Send the deposit to the contract
         (bool success, ) = address(sonder).call{value: depositAmount}(
-            abi.encodeWithSignature("depositFee()")
+            abi.encodeWithSignature("depositFee(string)", "agent1")
         );
         require(success, "Deposit failed");
 
@@ -147,7 +150,10 @@ contract SonderTest is Test {
         // addr1 deposits the required amount
         vm.deal(addr1, depositAmount); // Make sure addr1 has enough ETH
         vm.prank(addr1);
-        sonder.depositFee{value: depositAmount}();
+        (bool success, ) = address(sonder).call{value: depositAmount}(
+            abi.encodeWithSignature("depositFee(string)", "agent1")
+        );
+        require(success, "Deposit failed");
 
         // Check addr1's deposit balance
         uint256 addr1Balance = sonder.getUserDeposit(addr1);
