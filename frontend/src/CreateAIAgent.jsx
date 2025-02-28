@@ -12,8 +12,11 @@ export default function CreateAIAgent() {
   const [progress, setProgress] = useState(0);
 
   const handleCreate = async () => {
+
+    //ensure an api is included
     if (!api) return;
 
+    //ensure an account is included
     if (!account) {
       alert('Please sign in before uploading an agent.')
       return;
@@ -22,6 +25,7 @@ export default function CreateAIAgent() {
     if (api) {
 
       try {
+        //call create agent in backend
         const response = await fetch('http://localhost:3000/create_agent', {
           method: 'POST',
           headers: {
@@ -37,6 +41,7 @@ export default function CreateAIAgent() {
       }
     }
 
+    //reset variables in form
     setName("");
     setapi("");
     setapiKey("");
@@ -52,7 +57,7 @@ export default function CreateAIAgent() {
         <p className="text-gray-400">May the best agent win</p>
       </div>
   
-      {/* Upload Card - Now Full Width */}
+    {/* Upload card*/}
       <div className="w-full bg-gray-800 rounded-lg border border-gray-700 mb-6 p-6">
         <h2 className="text-xl font-semibold text-white mb-6">Enter Name for AI Agent</h2>
   
@@ -75,6 +80,7 @@ export default function CreateAIAgent() {
         />
 
 
+    
     <h2 className="text-xl font-semibold text-white mb-6 mt-6">Enter API Key to call AI agent API </h2>
       
       <input 
