@@ -1,10 +1,10 @@
 import React, { createContext, useState } from "react";
 import Web3 from "web3";
 
-// Step 1: Create Context
+//this file creates wallet context so user wallet address is shared across pages
+
 export const WalletContext = createContext();
 
-// Step 2: Create Provider Component
 export const WalletProvider = ({ children }) => {
   const [account, setAccount] = useState(null);
 

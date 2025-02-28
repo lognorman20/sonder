@@ -10,6 +10,7 @@ export default function LandingPage() {
     const [scores, setScores] = useState([]);
     const [rankedResults, setrankedResults] = useState([]);
     const [actualText, setActualText] = useState("It is much easier to hide corruption when the system is extremely inefficient. However, corruption sticks out like a sore thumb in an efficient system.");
+    //update visible agents on main page upon page reload
     useEffect(() => {
         const fetchAgents = async () => {
             try {
@@ -29,13 +30,15 @@ export default function LandingPage() {
         fetchAgents();
     }, []);
 
-
+    //function to handle comparison between agents and actual data
     const handleComparison = async () => {
       try {
+
+        //send data to agents in the backend and store their predictions
         const response = await fetch("http://localhost:3000/send-data", {
-          method: "POST", // Specify the request method
+          method: "POST", 
           headers: {
-              "Content-Type": "application/json" // Specify the content type
+              "Content-Type": "application/json" 
           },
           body: JSON.stringify({
              "text": "Write a tweet about government and poltiics, similar to this one: It is much easier to hide corruption when the system is extremely inefficient. However, corruption sticks out like a sore thumb in an efficient system."
@@ -50,13 +53,15 @@ export default function LandingPage() {
         console.log("Fetched Tweets:", data); 
         setTweets(data); 
       
+        //store agents predictions and other variables (id, name, address etc.)
         const predictions = data.map(item => ({
-          text: item.data.length > 0 ? item.data[0].text : "No tweet available", // ✅ Extract text (first tweet)
-          creatorAddress: item.agent_address, // ✅ Extract agent_address
-          agentId: item.agent_id, // ✅ Extract agent_id
+          text: item.data.length > 0 ? item.data[0].text : "No tweet available", 
+          creatorAddress: item.agent_address, 
+          agentId: item.agent_id, 
           agentName: item.agent_name
       }));
       
+      //call comparison in the AVS
       const taskResponse = await fetch("http://localhost:4003/task/execute", {
         method: "POST",
         headers: {
@@ -75,8 +80,9 @@ export default function LandingPage() {
     const taskData = await taskResponse.json();
     console.log("Task Execution Response:", taskData);
     
+    //Rank ai agents by their prediction score
     setrankedResults(
-      (taskData.data?.data || []) // Ensure it's an array, or use an empty array
+      (taskData.data?.data || []) 
           .map(item => ({
               agentId: item.agentId || "Unknown ID",
               agentName: item.agentName || "No Name",
@@ -95,6 +101,7 @@ export default function LandingPage() {
     }
 };
 
+//reward agent that performed the best
 const rewardHighestAgent = async () => {
   if (rankedResults.length === 0) {
       alert("No results available to reward!");
@@ -105,11 +112,13 @@ const rewardHighestAgent = async () => {
   const highestAgent = rankedResults[0];
   
   try {
+    //call backedn function to reward highest agent
       const response = await fetch("http://localhost:3000/reward_highest_agent", {
           method: "POST",
           headers: {
               "Content-Type": "application/json"
           },
+          //pass in ID, score, and address
           body: JSON.stringify({
               agentId: highestAgent.agentId,
               score: highestAgent.score,
@@ -151,8 +160,6 @@ const rewardHighestAgent = async () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {agents.map((agent, index) => (
           <div key={index} className="bg-gray-800 rounded-lg border border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow">
-            {/* <h3 className="text-xl font-semibold text-white mb-2">{card.title}</h3> */}
-            {/* <p className="text-gray-400 mb-4">{card.description}</p> */}
               <a 
                 href={agent.api} 
                 className="text-4xl text-blue-400 hover:text-blue-300 transition-colors mb-5"
