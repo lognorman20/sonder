@@ -5,21 +5,28 @@ const oracleService = require("./oracle.service");
 async function validate(proofOfTask) {
 
   try {
-      const taskResult = await dalService.getIPfsTask(proofOfTask);
-      var data = await oracleService.getPrice("BTCUSDT");
-      const upperBound = data.price * 1.05;
-      const lowerBound = data.price * 0.95;
-      let isApproved = true;
-      if (taskResult.price > upperBound || taskResult.price < lowerBound) {
-        isApproved = false;
-      }
-      return isApproved;
-    } catch (err) {
-      console.error(err?.message);
-      return false;
+    var isApproved = true;
+    const taskResult = await dalService.getIPfsTask(proofOfTask);
+    if (Object.keys(taskResult).length <= 0) {
+      console.log("Scores is empty");
+      isApproved = false;
     }
+
+    const isDescending = taskResult.every((_, i, arr) => 
+      i === 0 || arr[i - 1].score >= arr[i].score
+    );
+
+    if (isDescending == false) {
+      isApproved = false;
+    }
+
+    return isApproved;
+  } catch (err) {
+    console.error(err?.message);
+    return false;
   }
-  
-  module.exports = {
-    validate,
-  }
+}
+
+module.exports = {
+  validate,
+}

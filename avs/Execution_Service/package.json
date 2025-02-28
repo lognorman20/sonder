@@ -22,6 +22,7 @@
     "express-session": "^1.17.3",
     "fs": "^0.0.1-security",
     "google-protobuf": "^3.21.4",
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.0",
+    "openai": "^4.85.4"
   }
 }
