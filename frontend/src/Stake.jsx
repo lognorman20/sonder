@@ -14,6 +14,7 @@ const { account } = useContext(WalletContext);
 
   const handleStake = async () => {
     try {
+      //call stake agent in backend
         const response = await fetch('http://localhost:3000/stake_agent', {
           method: 'POST',
           headers: {
@@ -40,19 +41,10 @@ const { account } = useContext(WalletContext);
         <p className="text-gray-400">May the best agent win</p>
       </div>
   
-      {/* Upload Card - Now Full Width */}
+      {/* Upload Card */}
       <div className="w-full bg-gray-800 rounded-lg border border-gray-700 mb-6 p-6">
-        <h2 className="text-xl font-semibold text-white mb-6">Enter Wallet Address for AI Agent</h2>
   
-        <input 
-          type="text" 
-          placeholder="Ox..." 
-          className="w-full mt-2 px-4 py-2 border border-gray-600 bg-gray-900 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-        />
-  
-        <h2 className="text-xl font-semibold text-white mb-6 mt-6">Or enter API endpoint to call AI agent</h2>
+        <h2 className="text-xl font-semibold text-white mb-6 mt-6">Enter API endpoint to call AI agent</h2>
   
         <input 
           type="text" 
